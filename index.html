@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="My Pet App">
+    <meta name="apple-mobile-web-app-title" content="Pet Game">
 
-    <title>Virtual Pet</title>
+    <title>(100% Full) Virtual Pet</title>
     
-    <!-- This links your browser tab icon to your local photo -->
     <link id="tab-icon" rel="icon" type="image/x-icon" href="photo1.jpg">
 
     <style>
@@ -20,7 +19,7 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            background-color: #121212; /* Dark mode style */
+            background-color: #121212;
             color: #fff;
             margin: 0;
             padding: 20px;
@@ -36,9 +35,32 @@
         #status-text {
             color: #a1a1aa;
             font-size: 16px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             height: 20px;
             font-style: italic;
+        }
+
+        .hunger-container {
+            width: 100%;
+            max-width: 380px;
+            background-color: #27272a;
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+
+        .hunger-bar {
+            width: 100%;
+            height: 20px;
+            background: linear-gradient(90deg, #4ade80, #22c55e);
+            border-radius: 8px;
+            text-align: center;
+            font-size: 12px;
+            line-height: 20px;
+            font-weight: bold;
+            color: #000;
+            transition: width 0.5s ease, background 0.5s ease;
         }
 
         .image-container {
@@ -56,16 +78,15 @@
             height: 100%;
             object-fit: cover;
             display: block;
-            transition: opacity 0.3s ease-in-out, transform 0.2s ease-in-out; 
+            transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out; 
         }
 
         .bounce {
             transform: scale(1.06);
         }
 
-        /* The Feed Button styling */
         .feed-btn {
-            margin-top: 30px;
+            margin-top: 25px;
             background: linear-gradient(135deg, #ff4757, #ff6b81);
             color: white;
             border: none;
@@ -87,8 +108,12 @@
 <body>
 
     <h1>My Virtual Pet</h1>
-    <div id="status-text">Just chilling...</div>
+    <div id="status-text">Happy and content! 😊</div>
     
+    <div class="hunger-container">
+        <div id="hunger-bar" class="hunger-bar">Hunger: 100%</div>
+    </div>
+
     <div class="image-container">
         <img id="gallery-img" src="photo1.jpg" alt="Pet photo">
     </div>
@@ -96,62 +121,94 @@
     <button class="feed-btn" onclick="feedPet()">BAM! Feed Me 🍏</button>
 
     <script>
-        // 1. The random list of your normal local images
+        // Normal idling loop images
         const normalImages = [
             "photo1.jpg",
             "photo2.jpg",
             "photo3.jpg"
         ];
 
-        // 2. The local image it switches to when you feed him
-        const foodSrc = "eating.jpg";
+        let hunger = 100; 
+        let isEating = false;
 
         const imgElement = document.getElementById("gallery-img");
         const tabIconElement = document.getElementById("tab-icon");
         const statusText = document.getElementById("status-text");
+        const hungerBar = document.getElementById("hunger-bar");
 
-        let isEating = false;
+        function gameLoop() {
+            if (!isEating && hunger > 0) {
+                hunger -= 5;
+                if (hunger < 0) hunger = 0;
+                updateHungerUI();
+            }
 
-        // Automatically changes the photo randomly every 3 seconds
-        function changeImageRandomly() {
-            if (isEating) return; // Stop the random cycle while eating
+            if (isEating) return;
 
-            const randomIndex = Math.floor(Math.random() * normalImages.length);
-            const nextSrc = normalImages[randomIndex];
-
-            updatePhoto(nextSrc);
+            if (hunger === 0) {
+                statusText.innerText = "I am starving! Please feed me! 😭";
+                document.title = "⚠️ FEED ME!";
+            } else {
+                const randomIndex = Math.floor(Math.random() * normalImages.length);
+                updatePhoto(normalImages[randomIndex]);
+                document.title = `(${hunger}%) Virtual Pet`;
+            }
         }
 
-        // Runs when you hit the "Feed Me" button
+        function updateHungerUI() {
+            hungerBar.style.width = hunger + "%";
+            hungerBar.innerText = "Hunger: " + hunger + "%";
+
+            if (hunger > 60) {
+                hungerBar.style.background = "linear-gradient(90deg, #4ade80, #22c55e)"; 
+            } else if (hunger > 25) {
+                hungerBar.style.background = "linear-gradient(90deg, #fde047, #eab308)"; 
+            } else {
+                hungerBar.style.background = "linear-gradient(90deg, #f87171, #ef4444)"; 
+            }
+        }
+
         function feedPet() {
-            if (isEating) return; // Prevent multiple quick taps
+            if (isEating) return;
+            
             isEating = true;
-            statusText.innerText = "Nom nom nom... Delicious! 🎉";
+            statusText.innerText = "Nom nom nom... 🍏";
+            
+            hunger = Math.min(hunger + 20, 100);
+            updateHungerUI();
 
             imgElement.classList.add("bounce");
-            updatePhoto(foodSrc);
+            
+            // 1. Instantly show photo4.jpg
+            updatePhoto("photo4.jpg");
 
-            // Stays on the eating photo for 2.5 seconds, then goes back to normal
+            // 2. AFTER 2 SECONDS: switch to photo5.jpg
+            setTimeout(() => {
+                if (isEating) { 
+                    updatePhoto("photo5.jpg");
+                    statusText.innerText = "Munch munch... so good! 😋";
+                }
+            }, 2000); // 2000 milliseconds = 2 seconds
+
+            // 3. AFTER 4 SECONDS TOTAL: finish up and clear the eating state
             setTimeout(() => {
                 imgElement.classList.remove("bounce");
-                statusText.innerText = "Full and satisfied.";
+                statusText.innerText = "Yum! That hit the spot.";
                 isEating = false;
-            }, 2500);
+                document.title = `(${hunger}%) Virtual Pet`;
+            }, 4000); // 4000 milliseconds = 4 seconds total
         }
 
-        // Helper function that fades the images and swaps the browser tab icon
         function updatePhoto(src) {
             tabIconElement.href = src;
             imgElement.style.opacity = 0;
-            
             setTimeout(() => {
                 imgElement.src = src;
                 imgElement.style.opacity = 1;
-            }, 300);
+            }, 200); 
         }
 
-        // Shuffles the image every 3000ms (3 seconds)
-        setInterval(changeImageRandomly, 3000);
+        setInterval(gameLoop, 3000);
     </script>
 
 </body>
