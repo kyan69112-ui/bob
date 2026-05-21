@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Photo & Tab Changer</title>
+    
+    <!-- Sets the first tab icon to photo1.jpg -->
+    <link id="tab-icon" rel="icon" type="image/x-icon" href="photo1.jpg">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .image-container {
+            max-width: 500px;
+            width: 100%;
+            height: 400px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            border-radius: 4px;
+            transition: opacity 0.5s ease-in-out; 
+        }
+        p {
+            color: #666;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Random Gallery</h1>
+    
+    <div class="image-container">
+        <!-- Starts with photo1.jpg -->
+        <img id="gallery-img" src="photo1.jpg" alt="Random gallery photo">
+    </div>
+
+    <p>Randomly choosing photo 1, 2, or 3 for the page and tab every 3 seconds!</p>
+
+    <script>
+        // Your local files list
+        const images = [
+            "photo1.jpg",
+            "photo2.jpg",
+            "photo3.jpg"
+        ];
+
+        const imgElement = document.getElementById("gallery-img");
+        const tabIconElement = document.getElementById("tab-icon");
+
+        function changeImageRandomly() {
+            // Picks a random index (0, 1, or 2)
+            const randomIndex = Math.floor(Math.random() * images.length);
+            const randomImageSrc = images[randomIndex];
+
+            // 1. Change the tab icon instantly
+            tabIconElement.href = randomImageSrc;
+            
+            // 2. Fade out the main image, change it, and fade back in
+            imgElement.style.opacity = 0;
+            setTimeout(() => {
+                imgElement.src = randomImageSrc;
+                imgElement.style.opacity = 1;
+            }, 500); 
+        }
+
+        // Shuffle every 3 seconds
+        setInterval(changeImageRandomly, 3000);
+    </script>
+
+</body>
+</html>
