@@ -2,51 +2,61 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random Photo & Tab Changer</title>
+    <!-- This makes the page fit perfectly on your iPhone screen -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- Sets the first tab icon to photo1.jpg -->
+    <!-- These tags tell your iPhone to open this like a real standalone app instead of a website -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PhotoChanger">
+
+    <title>Random Photo App</title>
+    
+    <!-- Your App/Tab Icon -->
     <link id="tab-icon" rel="icon" type="image/x-icon" href="photo1.jpg">
+    <link rel="apple-touch-icon" href="photo1.jpg">
 
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            background-color: #f4f4f9;
-            color: #333;
+            background-color: #000000; /* Dark premium look for iPhone */
+            color: #fff;
             margin: 0;
             padding: 20px;
+            box-sizing: border-box;
+            user-select: none; /* Prevents accidental text selection on tap */
         }
         h1 {
-            color: #333;
+            font-size: 24px;
+            font-weight: 600;
             margin-bottom: 20px;
         }
         .image-container {
-            max-width: 500px;
             width: 100%;
-            height: 400px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            border-radius: 8px;
+            max-width: 400px;
+            aspect-ratio: 1 / 1; /* Makes the image a perfect square on mobile */
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            border-radius: 20px;
             overflow: hidden;
-            background: #fff;
-            padding: 10px;
-            box-sizing: border-box;
+            background: #1c1c1e;
         }
         img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
-            border-radius: 4px;
-            transition: opacity 0.5s ease-in-out; 
+            transition: opacity 0.4s ease-in-out; 
         }
         p {
-            color: #666;
-            margin-top: 15px;
+            color: #8e8e93;
+            margin-top: 20px;
+            font-size: 14px;
+            text-align: center;
         }
     </style>
 </head>
@@ -55,14 +65,12 @@
     <h1>Random Gallery</h1>
     
     <div class="image-container">
-        <!-- Starts with photo1.jpg -->
         <img id="gallery-img" src="photo1.jpg" alt="Random gallery photo">
     </div>
 
-    <p>Randomly choosing photo 1, 2, or 3 for the page and tab every 3 seconds!</p>
+    <p>Changing every 3 seconds...</p>
 
     <script>
-        // Your local files list
         const images = [
             "photo1.jpg",
             "photo2.jpg",
@@ -73,22 +81,20 @@
         const tabIconElement = document.getElementById("tab-icon");
 
         function changeImageRandomly() {
-            // Picks a random index (0, 1, or 2)
             const randomIndex = Math.floor(Math.random() * images.length);
             const randomImageSrc = images[randomIndex];
 
-            // 1. Change the tab icon instantly
+            // Updates the tab icon background link
             tabIconElement.href = randomImageSrc;
             
-            // 2. Fade out the main image, change it, and fade back in
+            // Fades the screen image
             imgElement.style.opacity = 0;
             setTimeout(() => {
                 imgElement.src = randomImageSrc;
                 imgElement.style.opacity = 1;
-            }, 500); 
+            }, 400); 
         }
 
-        // Shuffle every 3 seconds
         setInterval(changeImageRandomly, 3000);
     </script>
 
