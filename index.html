@@ -2,151 +2,51 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RFID/NFC Card Interface</title>
+    <title>RFID Terminal Box</title>
     <style>
-        body {
-            background-color: #121212;
-            color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-        }
-
-        .container {
-            text-align: center;
-            background: #1e1e1e;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-            width: 80%;
-            max-width: 500px;
-        }
-
-        h1 {
-            color: #00bcd4;
-            margin-bottom: 5px;
-        }
-
-        .status {
-            font-size: 14px;
-            color: #888;
-            margin-bottom: 25px;
-        }
-
-        .display-box {
-            background: #2d2d2d;
-            border: 2px dashed #444;
-            border-radius: 8px;
-            padding: 20px;
-            font-size: 24px;
-            font-family: monospace;
-            letter-spacing: 1px;
-            color: #00ff00;
-            margin-bottom: 20px;
-            transition: all 0.15s ease;
-        }
-
-        .display-box.flash {
-            background: #004d20;
-            border-color: #00ff00;
-            transform: scale(1.02);
-        }
-
-        .history-panel {
-            background: #181818;
-            border-radius: 6px;
-            padding: 15px;
-            max-height: 150px;
-            overflow-y: auto;
-            text-align: left;
-        }
-
-        .history-title {
-            font-size: 12px;
-            text-transform: uppercase;
-            color: #666;
-            margin-bottom: 8px;
-            letter-spacing: 1px;
-        }
-
-        .log-entry {
-            font-family: monospace;
-            font-size: 13px;
-            padding: 4px 0;
-            border-bottom: 1px solid #222;
-            color: #bbb;
-        }
+        body { background: #1a1a1a; color: #fff; font-family: sans-serif; text-align: center; padding-top: 50px; }
+        .box { background: #2a2a2a; padding: 30px; display: inline-block; border-radius: 8px; border: 2px solid #444; }
+        input { background: #333; color: #00ff00; border: 1px solid #555; padding: 10px; font-size: 20px; text-align: center; font-family: monospace; border-radius: 4px; width: 80%; }
+        .hint { color: #888; font-size: 13px; margin-top: 15px; }
+        ul { list-style: none; padding: 0; text-align: left; max-width: 300px; margin: 20px auto; }
+        li { background: #333; padding: 8px; margin-bottom: 5px; border-radius: 4px; font-family: monospace; font-size: 14px; border-left: 4px solid #00bcd4; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>RFID & NFC Reader</h1>
-        <div class="status">Click anywhere inside this window and scan a tag</div>
-
-        <div id="cardDisplay" class="display-box">READY TO SCAN...</div>
-
-        <div class="history-title">Scan Log</div>
-        <div id="historyLog" class="history-panel">
-            <div class="log-entry" style="color: #444;">No tags scanned yet.</div>
-        </div>
+    <div class="box">
+        <h2>RFID Input Terminal</h2>
+        <input type="text" id="scannerInput" placeholder="Click here & Scan Card" autofocus autocomplete="off">
+        <div class="hint">Ensure your cursor is blinking inside the box above!</div>
+        
+        <h3>Scanned IDs:</h3>
+        <ul id="scanList"></ul>
     </div>
 
     <script>
-        let cardBuffer = "";
-        let lastKeyTime = Date.now();
-        const cardDisplay = document.getElementById("cardDisplay");
-        const historyLog = document.getElementById("historyLog");
+        const inputField = document.getElementById("scannerInput");
+        const scanList = document.getElementById("scanList");
 
-        // Keep page looking active and capturing focus automatically
-        window.addEventListener("keydown", (event) => {
-            const currentTime = Date.now();
-
-            // Clear the temporary keys if the stream stalls out (human typing defense)
-            if (currentTime - lastKeyTime > 150) {
-                cardBuffer = "";
-            }
-            lastKeyTime = currentTime;
-
-            // The keyboard reader fires an 'Enter' key when it completes printing an ID string
-            if (event.key === "Enter") {
-                if (cardBuffer.length > 0) {
-                    processScan(cardBuffer);
-                    cardBuffer = ""; // Flush memory for next chip scan
-                }
-                return;
-            }
-
-            // Accept standard letters and digits, ignore metadata blocks like 'Shift'
-            if (event.key.length === 1) {
-                cardBuffer += event.key;
-            }
+        // Force focus back onto the input field if the user clicks away
+        document.addEventListener("click", () => {
+            inputField.focus();
         });
 
-        function processScan(uid) {
-            // Visual green bump indicator
-            cardDisplay.innerText = uid;
-            cardDisplay.classList.add("flash");
-            setTimeout(() => cardDisplay.classList.remove("flash"), 250);
-
-            // Strip the placeholder text on first run
-            if (historyLog.innerHTML.includes("No tags scanned yet.")) {
-                historyLog.innerHTML = "";
+        // Listen for the reader submitting the text string via the 'Enter' key
+        inputField.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault(); // Stop page refresh
+                const val = inputField.value.trim();
+                
+                if (val) {
+                    const li = document.createElement("li");
+                    li.innerText = `[${new Date().toLocaleTimeString()}] ${val}`;
+                    scanList.insertBefore(li, scanList.firstChild);
+                }
+                
+                inputField.value = ""; // Clear for next card scan
             }
-
-            // Append scan into local document history stack
-            const timestamp = new Date().toLocaleTimeString();
-            const logItem = document.createElement("div");
-            logItem.className = "log-entry";
-            logItem.innerHTML = `<span style="color: #00bcd4;">[${timestamp}]</span> ID: <strong style="color: #fff;">${uid}</strong>`;
-            
-            historyLog.insertBefore(logItem, historyLog.firstChild);
-        }
+        });
     </script>
 </body>
 </html>
